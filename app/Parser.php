@@ -20,7 +20,7 @@ final class Parser
             $substr = substr($line, $prefixLen);
             [$path, $date] = explode(',', $substr, limit: 2);
 
-            $date = substr($date, 0, 10);
+            $date = (int) str_replace('-','', substr($date, 0, 10));
 
             if(! array_key_exists($path, $map)) {
                 $map[$path][$date] = 1;
@@ -44,7 +44,9 @@ final class Parser
             ksort($dates);
 
             foreach($dates as $date => $visits) {
-                $buffer .= "        \"$date\": $visits".(next($dates) !== false ? ',' : '').PHP_EOL;
+                $buffer .= "        \"".
+                    substr($date, 0, 4) . '-' . substr($date, 4, 2) . '-' . substr($date, 6, 2)
+                    ."\": $visits".(next($dates) !== false ? ',' : '').PHP_EOL;
             }
 
             $buffer.= "    }".(next($map) !== false ? ',' : '').PHP_EOL;
