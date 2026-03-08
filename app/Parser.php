@@ -17,18 +17,18 @@ final class Parser
         $map = [];
 
         while (($line = fgets($fi)) !== false) {
-            $sub = substr($line, $prefixLen);
+            $substr = substr($line, $prefixLen);
+            [$path, $date] = explode(',', $substr, limit: 2);
 
-            $cols = str_getcsv($sub, escape: '/');
-            $cols[1] = substr($cols[1], 0, 10);
+            $date = substr($date, 0, 10);
 
-            if(! array_key_exists($cols[0], $map)) {
-                $map[$cols[0]][$cols[1]] = 1;
+            if(! array_key_exists($path, $map)) {
+                $map[$path][$date] = 1;
             } else {
-                if(! array_key_exists($cols[1], $map[$cols[0]])) {
-                    $map[$cols[0]][$cols[1]] = 1;
+                if(! array_key_exists($date, $map[$path])) {
+                    $map[$path][$date] = 1;
                 } else {
-                    $map[$cols[0]][$cols[1]]++;
+                    $map[$path][$date]++;
                 }
             }
         }
