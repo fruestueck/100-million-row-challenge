@@ -37,18 +37,23 @@ final class Parser
 
         // write
         $fo = fopen($outputPath, "w");
-        fwrite($fo, '{'.PHP_EOL);
+        $buffer = '{'.PHP_EOL;
         foreach($map as $path => $dates) {
-            fwrite($fo, "    \"$blog$path\": {".PHP_EOL);
+            $buffer .= "    \"$blog$path\": {".PHP_EOL;
 
-//            usort($dates, fn($a, $b) => strcmp($a[0], $b[0]));
             ksort($dates);
 
             foreach($dates as $date => $visits) {
-                fwrite($fo, "        \"$date\": $visits".(next($dates) !== false ? ',' : '').PHP_EOL);
+                $buffer .= "        \"$date\": $visits".(next($dates) !== false ? ',' : '').PHP_EOL;
             }
-            fwrite($fo, "    }".(next($map) !== false ? ',' : '').PHP_EOL);
+
+            $buffer.= "    }".(next($map) !== false ? ',' : '').PHP_EOL;
+
+            if(strlen($buffer) > 1_000) {
+                fwrite($fo, $buffer);
+                $buffer = '';
+            }
         }
-        fwrite($fo, '}');
+        fwrite($fo, $buffer.'}');
     }
 }
