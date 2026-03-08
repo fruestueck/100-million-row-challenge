@@ -20,16 +20,23 @@ final class Parser
         $map = [];
 
         while (($line = fgets($handle)) !== false) {
-            $substr = substr($line, $prefixLen);
-            [$path, $date] = explode(',', $substr, limit: 2);
-
-            $date = (int) str_replace('-','', substr($date, 0, 10));
+            $pos = strpos($line, ',', offset: $prefixLen);
+            $path = substr($line, offset: $prefixLen, length: $pos-$prefixLen);
+//            $date = substr($line, offset: $pos + 1, length: 10);
+//            $date = (int) str_replace('-','', $date);
+            $date = (int) str_replace(
+                search: '-',
+                replace: '',
+                subject: substr($line, offset: $pos + 1, length: 10)
+            );
 
             if(isset($map[$path][$date])) {
                 $map[$path][$date]++;
             } else {
                 $map[$path][$date] = 1;
             }
+//            ld($line, $pos, $path, $date);
+//            ld(array_first($map));
         }
 
         fclose($handle);
@@ -64,7 +71,6 @@ final class Parser
             }
         }
         fwrite($handle, $buffer.'}');
-        // ld(array_first($map));
         // echo memory_get_usage() - $baseMemory, "\n";
     }
 }
