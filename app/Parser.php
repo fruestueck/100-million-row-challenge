@@ -18,17 +18,10 @@ final class Parser
         $blog = '\/blog\/';
 
         $map = [];
-
         while (($line = fgets($handle)) !== false) {
-            $pos = strpos($line, ',', offset: $prefixLen);
-            $path = substr($line, offset: $prefixLen, length: $pos-$prefixLen);
-//            $date = substr($line, offset: $pos + 1, length: 10);
-//            $date = (int) str_replace('-','', $date);
-            $date = (int) str_replace(
-                search: '-',
-                replace: '',
-                subject: substr($line, offset: $pos + 1, length: 10)
-            );
+            $pos = strpos($line, ',', $prefixLen);
+            $path = substr($line, $prefixLen, $pos-$prefixLen);
+            $date = (int) str_replace('-', '', substr($line, $pos + 1, 10));
 
             if(isset($map[$path][$date])) {
                 $map[$path][$date]++;
@@ -53,8 +46,6 @@ final class Parser
             ksort($dates);
 
             $lastDate = array_key_last($dates);
-            $countDates = count($dates);
-
             foreach($dates as $date => $visits) {
                 $buffer .= "        \"".
                     substr($date, 0, 4) . '-' . substr($date, 4, 2) . '-' . substr($date, 6, 2)
