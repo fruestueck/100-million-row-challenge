@@ -5,10 +5,12 @@ namespace App;
 final class Parser
 {
     const int PARSE_URL_START = 25; // prefix 'https://stitcher.io/blog/'
-    const int PARSE_URL_LEN = -28;
-    const int PARSE_DATE_START = -27;
+    const int PARSE_URL_LEN = -27;
+    const int PARSE_DATE_START = -26;
     const int PARSE_DATE_LEN = 10;
     const string BLOG = '\/blog\/';
+
+    const int CHUNK_SIZE = 4096;
 
     public function parse(string $inputPath, string $outputPath): void
     {
@@ -18,16 +20,25 @@ final class Parser
         $handle = \fopen($inputPath, "r");
 
         $map = [];
-        while (($line = \fgets($handle)) !== false) {
-            $path = \substr($line, self::PARSE_URL_START, self::PARSE_URL_LEN);
-            $date = (int) \str_replace('-', '', \substr($line, self::PARSE_DATE_START, self::PARSE_DATE_LEN));
+        $buffer = '';
+        while (! \feof($handle)) {
+            $buffer .= \fread($handle, self::CHUNK_SIZE);
+            $lines = \explode("\n", $buffer);
 
-            if(isset($map[$path][$date])) {
-                $map[$path][$date]++;
-            } else {
-                $map[$path][$date] = 1;
+            $buffer = array_pop($lines);
+
+            foreach ($lines as $line) {
+                $path = \substr($line, self::PARSE_URL_START, self::PARSE_URL_LEN);
+                $date = (int) \str_replace('-', '', \substr($line, self::PARSE_DATE_START, self::PARSE_DATE_LEN));
+
+                if(isset($map[$path][$date])) {
+                    $map[$path][$date]++;
+                } else {
+                    $map[$path][$date] = 1;
+                }
+                // ld($line, $path, $date, array_first($map));
             }
-            // ld($line, $path, $date, array_first($map));
+
         }
 
         \fclose($handle);
