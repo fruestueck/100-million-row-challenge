@@ -12,9 +12,9 @@ final class Parser
 
     public function parse(string $inputPath, string $outputPath): void
     {
-        $startTime = \microtime(true);
-        //$baseMemory = memory_get_usage();
-        //gc_disable();
+        // $startTime = \microtime(true);
+        // $baseMemory = memory_get_usage();
+        // gc_disable();
         $handle = \fopen($inputPath, "r");
 
         $map = [];
@@ -34,7 +34,7 @@ final class Parser
         $handle = null;
         unset($handle);
 
-        $midTime = \microtime(true);
+        // $midTime = \microtime(true);
 
         // write
         $out = \fopen($outputPath, 'w');
@@ -65,13 +65,13 @@ final class Parser
         \fclose($out);
 
         // echo memory_get_usage() - $baseMemory, "\n";
-        $endTime = \microtime(true);
-        $time    = $endTime - $startTime;
-        $pT = $midTime - $startTime;
-        $oT = $endTime - $midTime;
-        $pP = \round($pT * 100 / $time, 1);
-        $oP = \round($oT * 100 / $time, 1);
-        echo '     ' . $pT . " $pP% process\n";
-        echo '     ' . $oT . " $oP% out\n";
+        // $endTime = \microtime(true);
+        // $time    = $endTime - $startTime;
+        // $pT = $midTime - $startTime;
+        // $oT = $endTime - $midTime;
+        // $pP = \round($pT * 100 / $time, 1);
+        // $oP = \round($oT * 100 / $time, 1);
+        // echo '     ' . $pT . " $pP% process\n";
+        // echo '     ' . $oT . " $oP% out\n";
     }
 }
