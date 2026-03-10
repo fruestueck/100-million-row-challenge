@@ -27,6 +27,7 @@ final class Parser
 
             $buffer = array_pop($lines);
 
+//            echo \sizeof($lines).PHP_EOL;
             foreach ($lines as $line) {
                 $path = \substr($line, self::PARSE_URL_START, self::PARSE_URL_LEN);
                 $date = (int) \str_replace('-', '', \substr($line, self::PARSE_DATE_START, self::PARSE_DATE_LEN));
