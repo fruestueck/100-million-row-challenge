@@ -2,8 +2,15 @@
 
 namespace App;
 
+use fopen;
+
 final class Parser
 {
+    const int PARSE_URL_START = 25;
+    const int PARSE_URL_LEN = -28;
+    const int PARSE_DATE_START = -27;
+    const int PARSE_DATE_LEN = 10;
+
     public function parse(string $inputPath, string $outputPath): void
     {
         $startTime = microtime(true);
@@ -13,21 +20,19 @@ final class Parser
 
         // $sitePrefix = 'https://stitcher.io/blog/';
         // $prefixLen = strlen($sitePrefix);
-        $prefixLen = 25;
         $blog = '\/blog\/';
 
         $map = [];
         while (($line = fgets($handle)) !== false) {
-            $pos = strpos($line, ',', $prefixLen);
-            $path = substr($line, $prefixLen, $pos-$prefixLen);
-            $date = (int) str_replace('-', '', substr($line, $pos + 1, 10));
+            $path = substr($line, self::PARSE_URL_START, self::PARSE_URL_LEN);
+            $date = (int) str_replace('-', '', substr($line, self::PARSE_DATE_START, self::PARSE_DATE_LEN));
 
             if(isset($map[$path][$date])) {
                 $map[$path][$date]++;
             } else {
                 $map[$path][$date] = 1;
             }
-//            ld($line, $pos, $path, $date);
+//            ld($line, $path, $date);
 //            ld(array_first($map));
         }
 
