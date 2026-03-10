@@ -2,12 +2,11 @@
 
 namespace App;
 
-use Exception;
-
 final class Parser
 {
     public function parse(string $inputPath, string $outputPath): void
     {
+        $startTime = microtime(true);
         //$baseMemory = memory_get_usage();
         //gc_disable();
         $handle = fopen($inputPath, "r");
@@ -36,8 +35,11 @@ final class Parser
         $handle = null;
         unset($handle);
 
+        $midTime = microtime(true);
+
         // write
-        $handle = fopen($outputPath, 'w');
+        $out = fopen($outputPath, 'w');
+        stream_set_write_buffer($out, 0);
         $buffer = '{'.PHP_EOL;
         $lastPath = array_key_last($map);
         foreach($map as $path => $dates) {
@@ -57,11 +59,21 @@ final class Parser
                 : '    },' . PHP_EOL;
 
             if(strlen($buffer) > 1_000) {
-                fwrite($handle, $buffer);
+                fwrite($out, $buffer);
                 $buffer = '';
             }
         }
-        fwrite($handle, $buffer.'}');
+        fwrite($out, $buffer.'}');
+        fclose($out);
+
         // echo memory_get_usage() - $baseMemory, "\n";
+        $endTime = microtime(true);
+        $time    = $endTime - $startTime;
+        $pT = $midTime - $startTime;
+        $oT = $endTime - $midTime;
+        $pP = round($pT * 100 / $time, 1);
+        $oP = round($oT * 100 / $time, 1);
+        echo '     ' . $pT . " $pP% process\n";
+        echo '     ' . $oT . " $oP% out\n";
     }
 }
