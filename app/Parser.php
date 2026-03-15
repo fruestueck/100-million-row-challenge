@@ -5,7 +5,7 @@ namespace App;
 final class Parser
 {
     const int PARSE_URL_START = 25; // prefix 'https://stitcher.io/blog/'
-    const int PARSE_DATE_LEN = 10;
+    const int PARSE_DATE_LEN = 7;
     const string BLOG = '\/blog\/';
 
     const int CHUNK_SIZE = 4096;
@@ -23,15 +23,15 @@ final class Parser
         while (! \feof($handle)) {
             $buffer .= \fread($handle, self::CHUNK_SIZE);
             $lines = \explode("\n", $buffer);
+            if(! $commaOffset){
+                $commaOffset = \strrpos($lines[0], ',', -25) - \strlen($lines[0]);
+            }
 
             $buffer = \array_pop($lines);
 
-            if($commaOffset === null){
-                $commaOffset = \strrpos($lines[0], ',', -25) - \strlen($lines[0]);
-            }
             foreach ($lines as $line) {
                 $path = \substr($line, self::PARSE_URL_START, $commaOffset);
-                $date = (int) \str_replace('-', '', \substr($line, $commaOffset+1, self::PARSE_DATE_LEN));
+                $date = (int) \str_replace('-', '', \substr($line, $commaOffset+4, self::PARSE_DATE_LEN));
 
                 if(isset($map[$path][$date])) {
                     $map[$path][$date]++;
@@ -60,9 +60,13 @@ final class Parser
 
             $lastDate = \array_key_last($dates);
             foreach($dates as $date => $visits) {
-                $buffer .= "        \"".
-                    \substr($date, 0, 4) . '-' . \substr($date, 4, 2) . '-' . \substr($date, 6, 2)
-                    ."\": $visits".($date === $lastDate ? PHP_EOL : ','.PHP_EOL);
+                $m = \intdiv($date % 10000, 100);
+                $d = $date % 100;
+
+                $buffer .= '        "202' . \intdiv($date, 10000) . '-' .
+                    ($m < 10 ? '0' : '') . $m . '-' .
+                    ($d < 10 ? '0' : '') . $d . '": '.
+                    $visits.($date === $lastDate ? PHP_EOL : ','.PHP_EOL);
             }
 
             $buffer.= $path === $lastPath
