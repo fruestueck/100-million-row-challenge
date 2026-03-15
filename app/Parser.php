@@ -5,8 +5,6 @@ namespace App;
 final class Parser
 {
     const int PARSE_URL_START = 25; // prefix 'https://stitcher.io/blog/'
-    const int PARSE_URL_LEN = -27;
-    const int PARSE_DATE_START = -26;
     const int PARSE_DATE_LEN = 10;
     const string BLOG = '\/blog\/';
 
@@ -21,23 +19,26 @@ final class Parser
 
         $map = [];
         $buffer = '';
+        $commaOffset = null;
         while (! \feof($handle)) {
             $buffer .= \fread($handle, self::CHUNK_SIZE);
             $lines = \explode("\n", $buffer);
 
-            $buffer = array_pop($lines);
+            $buffer = \array_pop($lines);
 
-//            echo \sizeof($lines).PHP_EOL;
+            if($commaOffset === null){
+                $commaOffset = \strrpos($lines[0], ',', -25) - \strlen($lines[0]);
+            }
             foreach ($lines as $line) {
-                $path = \substr($line, self::PARSE_URL_START, self::PARSE_URL_LEN);
-                $date = (int) \str_replace('-', '', \substr($line, self::PARSE_DATE_START, self::PARSE_DATE_LEN));
+                $path = \substr($line, self::PARSE_URL_START, $commaOffset);
+                $date = (int) \str_replace('-', '', \substr($line, $commaOffset+1, self::PARSE_DATE_LEN));
 
                 if(isset($map[$path][$date])) {
                     $map[$path][$date]++;
                 } else {
                     $map[$path][$date] = 1;
                 }
-                // ld($line, $path, $date, array_first($map));
+                // ld($line,$path, $date, $commaOffset, array_first($map));
             }
 
         }
